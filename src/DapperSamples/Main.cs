@@ -23,21 +23,26 @@ namespace DapperSamples
         /// </summary>
         private List<Product> DinamicSelect()
         {
-            SqlConnection conn = new SqlConnection(strConn);
-            conn.Open();
-
-            var result = conn.Query("SELECT * FROM PRODUCTS");
-
-            List<Product> lstProduct = new List<Product>();
-
-            foreach (dynamic product in result)
+            using (var conn = new SqlConnection(strConn))
             {
-                lstProduct.Add(new Product { ProductId = product.ProductId, Name = product.Name });
+                var result = conn.Query<Product, Category, Product>("SELECT * FROM PRODUCTS P INNER JOIN CATEGORIES C ON P.CATEGORYID = C.CATEGORYID", map: (product, category) =>
+                {
+                    product.Category = category;
+                    return product;
+                },
+                splitOn: "ProductId, CategoryId");
+
+                List<Product> lstProduct = new List<Product>();
+
+                foreach (dynamic product in result)
+                {
+                    lstProduct.Add(product);
+                }
+
+                conn.Close();
+
+                return lstProduct;
             }
-
-            conn.Close();
-
-            return lstProduct;
         }
 
         /// <summary>
@@ -48,7 +53,7 @@ namespace DapperSamples
             using (var conn = new SqlConnection(strConn))
             {
                 IEnumerable<Product> products = conn.Query<Product>("SELECT * FROM PRODUCTS");
-
+                
                 return products;
             }
         }
@@ -60,8 +65,8 @@ namespace DapperSamples
         {
             using (var conn = new SqlConnection(strConn))
             {
-                IEnumerable<Product> products = conn.Query<Product>("SELECT PRODUCTID, NAME FROM PRODUCTS WHERE NAME LIKE @Search", new { Search = "%te%" });
-
+                IEnumerable<Product> products = conn.Query<Product>("SELECT PRODUCTID, NAME FROM PRODUCTS WHERE NAME LIKE @Search", new { Search = "%note%" });
+                
                 return products;
             }
         }
@@ -76,7 +81,7 @@ namespace DapperSamples
             using (var conn = new SqlConnection(strConn))
             {
                 var product = conn.Query<Product>("SELECT * FROM PRODUCTS WHERE PRODUCTID=@ProductId", new { ProductId = productId }).SingleOrDefault();
-
+                
                 return product;
             }
         }
@@ -89,7 +94,7 @@ namespace DapperSamples
         {
             using (var conn = new SqlConnection(strConn))
             {
-                var newId = conn.Query<int>(@"INSERT INTO PRODUCTS (NAME) VALUES (@Name); SELECT CAST(SCOPE_IDENTITY() AS INT)", product).SingleOrDefault();
+                var newId = conn.Query<int>(@"INSERT INTO PRODUCTS (CATEGORYID, NAME) VALUES (@CategoryId, @Name); SELECT CAST(SCOPE_IDENTITY() AS INT)", product).SingleOrDefault();
                 product.ProductId = newId;
 
                 return product;
@@ -119,6 +124,7 @@ namespace DapperSamples
             using (var conn = new SqlConnection(strConn))
             {
                 var affectedrows = conn.Execute("DELETE FROM PRODUCTS WHERE PRODUCTID = @ProductId", new { ProductId = productId });
+                
                 return affectedrows > 0;
             }
         }
@@ -130,7 +136,7 @@ namespace DapperSamples
 
             foreach (Product product in products)
             {
-                txbResultQuery.AppendText(product.ProductId + "; " + product.Name + "\r\n");
+                txbResultQuery.AppendText(product.ProductId + "; " + product.Category.Name + ";" + product.Name + "\r\n");
             }
         }
 
@@ -152,15 +158,13 @@ namespace DapperSamples
 
             foreach (Product product in products)
             {
-                txbResultQuery.AppendText(product.ProductId + "; " + product.Name+"\r\n");
+                txbResultQuery.AppendText(product.ProductId + "; " + product.Name + "\r\n");
             }
         }
 
         private void btnInsert_Click(object sender, System.EventArgs e)
         {
-            Product product;
-
-            product = new Product { Name = "Notebook" };
+            Product product = new Product { CategoryId = 1, Name = "Notebook New" };
             Insert(product);
 
             if (product.ProductId > 0)
