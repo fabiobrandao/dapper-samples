@@ -21,3 +21,6 @@ $RECYCLE.BIN/
 # =========================
 # Operating System Files
 # =========================
+/.vs/DapperSamples/v15
+/src/DapperSamples/bin/Debug
+/src/DapperSamples/obj/Debug

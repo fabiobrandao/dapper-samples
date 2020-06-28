@@ -156,7 +156,7 @@
             this.Name = "Main";
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Dapper Samples";
+            this.Text = "Dapper SQLServer Samples";
             this.gbxOperations.ResumeLayout(false);
             this.gbxSelects.ResumeLayout(false);
             this.ResumeLayout(false);
