@@ -1,11 +1,10 @@
-﻿using System.Collections;
+﻿using Dapper;
+using DapperSamples.Entities;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Windows.Forms;
-using Dapper;
-using DapperSamples.Entities;
 
 namespace DapperSamples
 {
@@ -32,16 +31,16 @@ namespace DapperSamples
                 },
                 splitOn: "ProductId, CategoryId");
 
-                List<Product> lstProduct = new List<Product>();
+                List<Product> products = new List<Product>();
 
                 foreach (dynamic product in result)
                 {
-                    lstProduct.Add(product);
+                    products.Add(product);
                 }
 
                 conn.Close();
 
-                return lstProduct;
+                return products;
             }
         }
 
@@ -173,9 +172,7 @@ namespace DapperSamples
 
         private void btnGetById_Click(object sender, System.EventArgs e)
         {
-            int id = 1;
-
-            Product product = GetById(id);
+            Product product = GetById(1);
 
             txbResultQuery.Clear();
             txbResultQuery.AppendText(product.ProductId + " ; " + product.Name);
@@ -183,9 +180,7 @@ namespace DapperSamples
 
         private void btnUpdate_Click(object sender, System.EventArgs e)
         {
-            int id = 1;
-
-            Product product = GetById(id);
+            Product product = GetById(1);
             product.Name = "New Name";
 
             if (Update(product))

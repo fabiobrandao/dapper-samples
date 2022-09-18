@@ -1,5 +1,4 @@
-﻿
-namespace DapperSamples.Entities
+﻿namespace DapperSamples.Entities
 {
     public class Product
     {
